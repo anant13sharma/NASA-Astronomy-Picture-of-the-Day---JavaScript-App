@@ -91,15 +91,18 @@ function createDOMNodes(page) {
 }
 
 function updateDOM(page) {
-    //  get favorites from local storage
     if (localStorage.getItem('nasaFavorites')) {
         favorites = JSON.parse(localStorage.getItem('nasaFavorites'))
     }
     imagesContainer.textContent = ''
     createDOMNodes(page)
-    showContent(page)
-
+    
+    // Add delay to show loader properly
+    setTimeout(() => {
+        showContent(page)
+    }, 400) // smooth transition
 }
+
 
 // get 10 images from nasa api
 async function getNasaPictures(counter) {
