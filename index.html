@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🚀 NASA Astronomy Picture of the Day by Anant</title>
+  <link rel="icon" href="https://s2.googleusercontent.com/s2/favicons?domain=www.nasa.gov"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: #0b0c10;
+      color: #c5c6c7;
+      overflow-x: hidden;
+      position: relative;
+      z-index: 1;
+    }
+    #vanta-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      width: 100vw;
+      height: 100vh;
+    }
+    header {
+      padding: 30px 10px;
+      text-align: center;
+      color: #66fcf1;
+      font-size: clamp(1.8rem, 4vw, 2.2rem);
+      letter-spacing: 2px;
+      text-shadow: 0 0 15px #66fcf1;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(102, 252, 241, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 600px;
+      width: 90vw;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 30px rgba(102,252,241,0.15);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 40px rgba(102,252,241,0.3);
+    }
+    .card img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    .card h3 {
+      color: #66fcf1;
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 30px;
+      background: #66fcf1;
+      color: #0b0c10;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.3s ease;
+    }
+    .btn:hover {
+      background: transparent;
+      color: #66fcf1;
+      border: 2px solid #66fcf1;
+    }
+    .footer {
+      text-align: center;
+      padding: 40px 10px 20px;
+      font-size: clamp(0.8rem, 2.5vw, 1rem);
+      color: #94a3b8;
+    }
+    .social-icons a {
+      margin: 0 10px;
+      color: #66fcf1;
+      font-size: 1.4rem;
+      transition: color 0.3s ease;
+    }
+    .social-icons a:hover {
+      color: white;
+    }
+    a.read-more, a.read-less {
+      color: #66fcf1;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 0.95rem;
+    }
+    @media only screen and (max-width: 430px) {
+      .card {
+        padding: 15px;
+      }
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="vanta-bg"></div>
+  <header>🚀 NASA Astronomy Picture of the Day by Anant</header>
+  <div class="container" id="image-container">
+    <p>🛰️ Loading...</p>
+  </div>
+  <div class="container">
+    <button class="btn" onclick="loadImages()">🔃 Load More</button>
+  </div>
+  <div class="footer">
+    <p>Made with 🌌 by <strong style="color: #66fcf1;">Anant Sharma</strong></p>
+    <div class="social-icons">
+      <a href="https://instagram.com/therealanantsharma" target="_blank"><i class="fab fa-instagram"></i></a>
+      <a href="https://linkedin.com/in/anant13sharma" target="_blank"><i class="fab fa-linkedin"></i></a>
+      <a href="https://github.com/anant13sharma" target="_blank"><i class="fab fa-github"></i></a>
+    </div>
+  </div>
+  <script>
+    let apiKey = '5gkYoJ2KdyTDctrVfILxajRvXrx5tDt1FA6YMmY7';
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || {};
+
+    async function loadImages() {
+      const container = document.getElementById('image-container');
+      container.innerHTML = '<p>🛰️ Loading...</p>';
+      try {
+        const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${apiKey}&count=3`);
+        const data = await res.json();
+        if (!Array.isArray(data)) throw new Error('Unexpected data format.');
+        container.innerHTML = '';
+        data.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          let shortText = item.explanation.slice(0, 250);
+          card.innerHTML = `
+            <img src="${item.url}" alt="${item.title}" />
+            <h3>${item.title}</h3>
+            <p>
+              ${shortText}...
+              <a class="read-more" onclick="toggleText(this, \`${item.explanation.replace(/`/g, "'")}\`, \`${shortText.replace(/`/g, "'")}\`)">Read more</a>
+            </p>
+            <button class="btn" onclick="addToFavorites('${item.url.replaceAll("'", "")}', '${encodeURIComponent(JSON.stringify(item))}')">💙 Save to Favorites</button>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        container.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
+        console.error(err);
+      }
+    }
+
+    function toggleText(link, fullText, shortText) {
+      const isExpanded = link.classList.contains('read-less');
+      const parent = link.parentElement;
+      if (!isExpanded) {
+        parent.innerHTML = `${fullText} <a class="read-less" onclick="toggleText(this, \`${fullText}\`, \`${shortText}\`)">Show less</a>`;
+      } else {
+        parent.innerHTML = `${shortText}... <a class="read-more" onclick="toggleText(this, \`${fullText}\`, \`${shortText}\`)">Read more</a>`;
+      }
+    }
+
+    function addToFavorites(url, raw) {
+      const data = JSON.parse(decodeURIComponent(raw));
+      if (!favorites[url]) {
+        favorites[url] = data;
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        alert('💾 Added to favorites!');
+      } else {
+        alert('Already in favorites!');
+      }
+    }
+
+    VANTA.NET({
+      el: "#vanta-bg",
+      mouseControls: true,
+      touchControls: true,
+      gyroControls: false,
+      minHeight: 200.00,
+      minWidth: 200.00,
+      scale: 1.00,
+      scaleMobile: 1.00,
+      color: 0x66fcf1,
+      backgroundColor: 0x0b0c10,
+      maxDistance: 22.00,
+      spacing: 18.00
+    });
+
+    loadImages();
+  </script>
+</body>
+</html>
